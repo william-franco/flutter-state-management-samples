@@ -1,11 +1,11 @@
 {
-    "name": "bottom_provider",
-    "short_name": "bottom_provider",
+    "name": "flutter_state_management_samples",
+    "short_name": "flutter_state_management_samples",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "App to navigate between screens using Provider.",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

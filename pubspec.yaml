@@ -1,30 +1,37 @@
-name: bottom_provider
-description: App to navigate between screens using Provider.
+name: flutter_state_management_samples
+description: "A new Flutter project."
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ^3.10.3
 
 dependencies:
   flutter:
     sdk: flutter
 
-  # External packages.
-  cupertino_icons: ^1.0.2
-  encrypted_shared_preferences: ^2.0.0
-  introduction_screen: ^2.1.0
-  provider: ^6.0.1
+  # External dependencies.
+  cupertino_icons: ^1.0.8
+  flutter_bloc: ^9.1.1
+  signals_flutter: ^6.3.0
+  provider: ^6.1.5+1
+  mobx: ^2.5.0
+  flutter_mobx: ^2.3.0
+  flutter_riverpod: ^3.0.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^1.0.4
-  test: ^1.17.10
+
+  # External dev dependencies.
+  flutter_lints: ^6.0.0
+  build_runner: ^2.10.4
+  mobx_codegen: ^2.7.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
-# The following section is specific to Flutter.
+# The following section is specific to Flutter packages.
 flutter:
 
   # The following line ensures that the Material Icons font is
@@ -38,10 +45,10 @@ flutter:
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/assets-and-images/#resolution-aware.
+  # https://flutter.dev/to/resolution-aware-images
 
   # For details regarding adding assets from package dependencies, see
-  # https://flutter.dev/assets-and-images/#from-packages
+  # https://flutter.dev/to/asset-from-package
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
@@ -61,4 +68,4 @@ flutter:
   #         weight: 700
   #
   # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/custom-fonts/#from-packages
+  # see https://flutter.dev/to/font-from-package
