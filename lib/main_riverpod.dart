@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -11,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ChangeNotifier Example',
+      title: 'Riverpod Example',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(useMaterial3: true),
       darkTheme: ThemeData.dark(useMaterial3: true),
@@ -20,6 +22,14 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+final userRepositoryProvider = Provider<UserRepository>((ref) {
+  return UserRepositoryImpl();
+});
+
+final userViewModelProvider = NotifierProvider<UserViewModel, UserState>(
+  UserViewModelImpl.new,
+);
 
 sealed class AppState<T> {
   const AppState();
@@ -97,7 +107,7 @@ class UserRepositoryImpl implements UserRepository {
   }
 }
 
-typedef _ViewModel = ChangeNotifier;
+typedef _ViewModel = Notifier<AppState<UserModel>>;
 
 typedef UserState = AppState<UserModel>;
 
@@ -108,67 +118,56 @@ abstract interface class UserViewModel extends _ViewModel {
 }
 
 class UserViewModelImpl extends _ViewModel implements UserViewModel {
-  final UserRepository userRepository;
-
-  UserViewModelImpl({required this.userRepository});
-
-  UserState _userState = InitialState();
+  late final UserRepository userRepository;
 
   @override
-  UserState get userState => _userState;
+  UserState build() {
+    userRepository = ref.read(userRepositoryProvider);
+    return const InitialState();
+  }
+
+  @override
+  UserState get userState => state;
 
   @override
   Future<void> getUserData() async {
-    _emit(LoadingState());
+    state = const LoadingState();
+    _debug();
 
     final result = await userRepository.findOneUser();
 
-    final state = result.fold<UserState>(
+    final newState = result.fold<UserState>(
       onSuccess: (value) => SuccessState(data: value),
       onError: (error) => ErrorState(message: '$error'),
     );
 
-    _emit(state);
+    state = newState;
+    _debug();
   }
 
-  void _emit(UserState newValue) {
-    if (_userState != newValue) {
-      _userState = newValue;
-      notifyListeners();
-      debugPrint('User state: $_userState');
-    }
+  void _debug() {
+    debugPrint('User state: $state');
   }
 }
 
-class UserView extends StatefulWidget {
+class UserView extends ConsumerStatefulWidget {
   const UserView({super.key});
 
   @override
-  State<UserView> createState() => _UserViewState();
+  ConsumerState<UserView> createState() => _UserViewState();
 }
 
-class _UserViewState extends State<UserView> {
-  late final UserRepository userRepository;
-  late final UserViewModel userViewModel;
-
+class _UserViewState extends ConsumerState<UserView> {
   @override
   void initState() {
     super.initState();
-    userRepository = UserRepositoryImpl();
-    userViewModel = UserViewModelImpl(userRepository: userRepository);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _getUserData();
     });
   }
 
-  @override
-  void dispose() {
-    userViewModel.dispose();
-    super.dispose();
-  }
-
   Future<void> _getUserData() async {
-    await userViewModel.getUserData();
+    await ref.read(userViewModelProvider.notifier).getUserData();
   }
 
   @override
@@ -180,10 +179,10 @@ class _UserViewState extends State<UserView> {
           onRefresh: () async {
             await _getUserData();
           },
-          child: ListenableBuilder(
-            listenable: userViewModel,
-            builder: (context, child) {
-              return switch (userViewModel.userState) {
+          child: StateBuilderWidget<UserState>(
+            provider: userViewModelProvider,
+            builder: (context, state) {
+              return switch (state) {
                 InitialState() => const Text('Aguardando ação...'),
                 LoadingState() => const CircularProgressIndicator(),
                 SuccessState(data: final user) => Text('Usuário: ${user.name}'),
@@ -193,6 +192,30 @@ class _UserViewState extends State<UserView> {
           ),
         ),
       ),
+    );
+  }
+}
+
+@protected
+typedef StateBuilder<T> = Widget Function(BuildContext context, T state);
+
+class StateBuilderWidget<T> extends StatelessWidget {
+  final ProviderListenable<T> provider;
+  final StateBuilder<T> builder;
+
+  const StateBuilderWidget({
+    super.key,
+    required this.provider,
+    required this.builder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final state = ref.watch(provider);
+        return builder(context, state);
+      },
     );
   }
 }

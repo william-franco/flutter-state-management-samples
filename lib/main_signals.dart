@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ChangeNotifier Example',
+      title: 'Signals Example',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(useMaterial3: true),
       darkTheme: ThemeData.dark(useMaterial3: true),
@@ -97,46 +98,42 @@ class UserRepositoryImpl implements UserRepository {
   }
 }
 
-typedef _ViewModel = ChangeNotifier;
+typedef UserState = Signal<AppState<UserModel>>;
 
-typedef UserState = AppState<UserModel>;
-
-abstract interface class UserViewModel extends _ViewModel {
+abstract interface class UserViewModel {
   UserState get userState;
 
   Future<void> getUserData();
 }
 
-class UserViewModelImpl extends _ViewModel implements UserViewModel {
+class UserViewModelImpl implements UserViewModel {
   final UserRepository userRepository;
 
   UserViewModelImpl({required this.userRepository});
 
-  UserState _userState = InitialState();
+  final _userState = UserState(InitialState());
 
   @override
   UserState get userState => _userState;
 
   @override
   Future<void> getUserData() async {
-    _emit(LoadingState());
+    _userState.value = LoadingState();
+    _debug();
 
     final result = await userRepository.findOneUser();
 
-    final state = result.fold<UserState>(
+    final state = result.fold<AppState<UserModel>>(
       onSuccess: (value) => SuccessState(data: value),
-      onError: (error) => ErrorState(message: '$error'),
+      onError: (error) => ErrorState(message: error.toString()),
     );
 
-    _emit(state);
+    _userState.value = state;
+    _debug();
   }
 
-  void _emit(UserState newValue) {
-    if (_userState != newValue) {
-      _userState = newValue;
-      notifyListeners();
-      debugPrint('User state: $_userState');
-    }
+  void _debug() {
+    debugPrint('User state: $_userState');
   }
 }
 
@@ -163,7 +160,7 @@ class _UserViewState extends State<UserView> {
 
   @override
   void dispose() {
-    userViewModel.dispose();
+    userViewModel.userState.dispose();
     super.dispose();
   }
 
@@ -180,10 +177,9 @@ class _UserViewState extends State<UserView> {
           onRefresh: () async {
             await _getUserData();
           },
-          child: ListenableBuilder(
-            listenable: userViewModel,
-            builder: (context, child) {
-              return switch (userViewModel.userState) {
+          child: Watch.builder(
+            builder: (context) {
+              return switch (userViewModel.userState.value) {
                 InitialState() => const Text('Aguardando ação...'),
                 LoadingState() => const CircularProgressIndicator(),
                 SuccessState(data: final user) => Text('Usuário: ${user.name}'),

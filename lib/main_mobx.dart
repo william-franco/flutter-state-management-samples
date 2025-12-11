@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart';
+
+part 'main_mobx.g.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ChangeNotifier Example',
+      title: 'Mobx Example',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(useMaterial3: true),
       darkTheme: ThemeData.dark(useMaterial3: true),
@@ -97,46 +101,35 @@ class UserRepositoryImpl implements UserRepository {
   }
 }
 
-typedef _ViewModel = ChangeNotifier;
-
 typedef UserState = AppState<UserModel>;
 
-abstract interface class UserViewModel extends _ViewModel {
-  UserState get userState;
+class UserViewModel = UserViewModelBase with _$UserViewModel;
 
-  Future<void> getUserData();
-}
-
-class UserViewModelImpl extends _ViewModel implements UserViewModel {
+abstract class UserViewModelBase with Store {
   final UserRepository userRepository;
 
-  UserViewModelImpl({required this.userRepository});
+  UserViewModelBase({required this.userRepository});
 
-  UserState _userState = InitialState();
+  @observable
+  UserState userState = const InitialState();
 
-  @override
-  UserState get userState => _userState;
-
-  @override
+  @action
   Future<void> getUserData() async {
-    _emit(LoadingState());
+    userState = const LoadingState();
+    _debug();
 
     final result = await userRepository.findOneUser();
 
-    final state = result.fold<UserState>(
+    userState = result.fold<UserState>(
       onSuccess: (value) => SuccessState(data: value),
       onError: (error) => ErrorState(message: '$error'),
     );
 
-    _emit(state);
+    _debug();
   }
 
-  void _emit(UserState newValue) {
-    if (_userState != newValue) {
-      _userState = newValue;
-      notifyListeners();
-      debugPrint('User state: $_userState');
-    }
+  void _debug() {
+    debugPrint('User state: $userState');
   }
 }
 
@@ -155,7 +148,7 @@ class _UserViewState extends State<UserView> {
   void initState() {
     super.initState();
     userRepository = UserRepositoryImpl();
-    userViewModel = UserViewModelImpl(userRepository: userRepository);
+    userViewModel = UserViewModel(userRepository: userRepository);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _getUserData();
     });
@@ -163,7 +156,6 @@ class _UserViewState extends State<UserView> {
 
   @override
   void dispose() {
-    userViewModel.dispose();
     super.dispose();
   }
 
@@ -180,9 +172,8 @@ class _UserViewState extends State<UserView> {
           onRefresh: () async {
             await _getUserData();
           },
-          child: ListenableBuilder(
-            listenable: userViewModel,
-            builder: (context, child) {
+          child: StateBuilderWidget(
+            builder: (context) {
               return switch (userViewModel.userState) {
                 InitialState() => const Text('Aguardando ação...'),
                 LoadingState() => const CircularProgressIndicator(),
@@ -194,5 +185,19 @@ class _UserViewState extends State<UserView> {
         ),
       ),
     );
+  }
+}
+
+@protected
+typedef StateBuilder = Widget Function(BuildContext context);
+
+class StateBuilderWidget extends StatelessWidget {
+  final StateBuilder builder;
+
+  const StateBuilderWidget({super.key, required this.builder});
+
+  @override
+  Widget build(BuildContext context) {
+    return Observer(builder: (_) => builder(context));
   }
 }

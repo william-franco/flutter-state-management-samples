@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ChangeNotifier Example',
+      title: 'Bloc Example',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(useMaterial3: true),
       darkTheme: ThemeData.dark(useMaterial3: true),
@@ -97,12 +98,12 @@ class UserRepositoryImpl implements UserRepository {
   }
 }
 
-typedef _ViewModel = ChangeNotifier;
+typedef _ViewModel = Cubit<AppState<UserModel>>;
 
 typedef UserState = AppState<UserModel>;
 
 abstract interface class UserViewModel extends _ViewModel {
-  UserState get userState;
+  UserViewModel(super.initialState);
 
   Future<void> getUserData();
 }
@@ -110,16 +111,13 @@ abstract interface class UserViewModel extends _ViewModel {
 class UserViewModelImpl extends _ViewModel implements UserViewModel {
   final UserRepository userRepository;
 
-  UserViewModelImpl({required this.userRepository});
-
-  UserState _userState = InitialState();
-
-  @override
-  UserState get userState => _userState;
+  UserViewModelImpl({required this.userRepository})
+    : super(const InitialState());
 
   @override
   Future<void> getUserData() async {
-    _emit(LoadingState());
+    emit(const LoadingState());
+    _debug();
 
     final result = await userRepository.findOneUser();
 
@@ -128,15 +126,12 @@ class UserViewModelImpl extends _ViewModel implements UserViewModel {
       onError: (error) => ErrorState(message: '$error'),
     );
 
-    _emit(state);
+    emit(state);
+    _debug();
   }
 
-  void _emit(UserState newValue) {
-    if (_userState != newValue) {
-      _userState = newValue;
-      notifyListeners();
-      debugPrint('User state: $_userState');
-    }
+  void _debug() {
+    debugPrint('User state: $state');
   }
 }
 
@@ -163,7 +158,7 @@ class _UserViewState extends State<UserView> {
 
   @override
   void dispose() {
-    userViewModel.dispose();
+    userViewModel.close();
     super.dispose();
   }
 
@@ -180,10 +175,10 @@ class _UserViewState extends State<UserView> {
           onRefresh: () async {
             await _getUserData();
           },
-          child: ListenableBuilder(
-            listenable: userViewModel,
-            builder: (context, child) {
-              return switch (userViewModel.userState) {
+          child: StateBuilderWidget<UserViewModel, UserState>(
+            viewModel: userViewModel,
+            builder: (context, state) {
+              return switch (state) {
                 InitialState() => const Text('Aguardando ação...'),
                 LoadingState() => const CircularProgressIndicator(),
                 SuccessState(data: final user) => Text('Usuário: ${user.name}'),
@@ -192,6 +187,35 @@ class _UserViewState extends State<UserView> {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+@protected
+typedef StateBuilder<S> = Widget Function(BuildContext context, S state);
+
+class StateBuilderWidget<V extends Cubit<S>, S> extends StatelessWidget {
+  final V viewModel;
+  final StateBuilder<S> builder;
+  final Widget? child;
+
+  const StateBuilderWidget({
+    super.key,
+    required this.viewModel,
+    required this.builder,
+    this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<V>.value(
+      value: viewModel,
+      child: BlocBuilder<V, S>(
+        bloc: viewModel,
+        builder: (context, state) {
+          return builder(context, state);
+        },
       ),
     );
   }

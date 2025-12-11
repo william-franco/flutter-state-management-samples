@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ChangeNotifier Example',
+      title: 'Provider Example',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(useMaterial3: true),
       darkTheme: ThemeData.dark(useMaterial3: true),
@@ -180,10 +181,10 @@ class _UserViewState extends State<UserView> {
           onRefresh: () async {
             await _getUserData();
           },
-          child: ListenableBuilder(
-            listenable: userViewModel,
-            builder: (context, child) {
-              return switch (userViewModel.userState) {
+          child: StateBuilderWidget<UserViewModel>(
+            viewModel: userViewModel,
+            builder: (context, state) {
+              return switch (state.userState) {
                 InitialState() => const Text('Aguardando ação...'),
                 LoadingState() => const CircularProgressIndicator(),
                 SuccessState(data: final user) => Text('Usuário: ${user.name}'),
@@ -192,6 +193,32 @@ class _UserViewState extends State<UserView> {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+@protected
+typedef StateBuilder<S> = Widget Function(BuildContext context, S state);
+
+class StateBuilderWidget<T extends ChangeNotifier> extends StatelessWidget {
+  final T viewModel;
+  final StateBuilder<T> builder;
+
+  const StateBuilderWidget({
+    super.key,
+    required this.builder,
+    required this.viewModel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<T>.value(
+      value: viewModel,
+      child: Consumer<T>(
+        builder: (context, notifier, child) {
+          return builder(context, notifier);
+        },
       ),
     );
   }
