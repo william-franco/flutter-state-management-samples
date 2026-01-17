@@ -98,7 +98,7 @@ class UserRepositoryImpl implements UserRepository {
   }
 }
 
-typedef _ViewModel = Cubit<AppState<UserModel>>;
+typedef _ViewModel = StateManagement<AppState<UserModel>>;
 
 typedef UserState = AppState<UserModel>;
 
@@ -199,6 +199,17 @@ class _UserViewState extends State<UserView> {
         ),
       ),
     );
+  }
+}
+
+abstract class StateManagement<T> extends Cubit<T> {
+  StateManagement(super.initialState);
+
+  @protected
+  void emitState(T newState) {
+    if (state != newState) {
+      emit(newState);
+    }
   }
 }
 

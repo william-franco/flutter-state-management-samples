@@ -174,7 +174,17 @@ class _UserViewState extends State<UserView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('User Info')),
+      appBar: AppBar(
+        title: const Text('User Info'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh_outlined),
+            onPressed: () async {
+              await _getUserData();
+            },
+          ),
+        ],
+      ),
       body: Center(
         child: RefreshIndicator(
           onRefresh: () async {
