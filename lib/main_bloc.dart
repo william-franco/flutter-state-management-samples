@@ -98,7 +98,7 @@ class UserRepositoryImpl implements UserRepository {
   }
 }
 
-typedef _ViewModel = StateManagement<AppState<UserModel>>;
+typedef _ViewModel = StateManagement<UserState>;
 
 typedef UserState = AppState<UserModel>;
 
@@ -111,26 +111,24 @@ abstract interface class UserViewModel extends _ViewModel {
 class UserViewModelImpl extends _ViewModel implements UserViewModel {
   final UserRepository userRepository;
 
-  UserViewModelImpl({required this.userRepository})
-    : super(const InitialState());
+  UserViewModelImpl({required this.userRepository}) : super(InitialState());
 
   @override
   Future<void> getUserData() async {
-    emit(const LoadingState());
-    _debug();
+    _emit(LoadingState());
 
     final result = await userRepository.findOneUser();
 
-    final state = result.fold<UserState>(
+    final userState = result.fold<UserState>(
       onSuccess: (value) => SuccessState(data: value),
       onError: (error) => ErrorState(message: '$error'),
     );
 
-    emit(state);
-    _debug();
+    _emit(userState);
   }
 
-  void _debug() {
+  void _emit(UserState newState) {
+    emitState(newState);
     debugPrint('User state: $state');
   }
 }

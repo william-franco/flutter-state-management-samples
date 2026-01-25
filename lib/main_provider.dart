@@ -98,12 +98,12 @@ class UserRepositoryImpl implements UserRepository {
   }
 }
 
-typedef _ViewModel = ChangeNotifier;
+typedef _ViewModel = StateManagement<UserState>;
 
 typedef UserState = AppState<UserModel>;
 
 abstract interface class UserViewModel extends _ViewModel {
-  UserState get userState;
+  UserViewModel(super.initialState);
 
   Future<void> getUserData();
 }
@@ -111,12 +111,7 @@ abstract interface class UserViewModel extends _ViewModel {
 class UserViewModelImpl extends _ViewModel implements UserViewModel {
   final UserRepository userRepository;
 
-  UserViewModelImpl({required this.userRepository});
-
-  UserState _userState = InitialState();
-
-  @override
-  UserState get userState => _userState;
+  UserViewModelImpl({required this.userRepository}) : super(InitialState());
 
   @override
   Future<void> getUserData() async {
@@ -124,20 +119,17 @@ class UserViewModelImpl extends _ViewModel implements UserViewModel {
 
     final result = await userRepository.findOneUser();
 
-    final state = result.fold<UserState>(
+    final userState = result.fold<UserState>(
       onSuccess: (value) => SuccessState(data: value),
       onError: (error) => ErrorState(message: '$error'),
     );
 
-    _emit(state);
+    _emit(userState);
   }
 
-  void _emit(UserState newValue) {
-    if (_userState != newValue) {
-      _userState = newValue;
-      notifyListeners();
-      debugPrint('User state: $_userState');
-    }
+  void _emit(UserState newState) {
+    emitState(newState);
+    debugPrint('User state: $state');
   }
 }
 
@@ -193,8 +185,8 @@ class _UserViewState extends State<UserView> {
           },
           child: StateBuilderWidget<UserViewModel>(
             viewModel: userViewModel,
-            builder: (context, state) {
-              return switch (state.userState) {
+            builder: (context, viewModel) {
+              return switch (viewModel.state) {
                 InitialState() => const Text('Aguardando ação...'),
                 LoadingState() => const CircularProgressIndicator(),
                 SuccessState(data: final user) => Text('Usuário: ${user.name}'),
@@ -205,6 +197,21 @@ class _UserViewState extends State<UserView> {
         ),
       ),
     );
+  }
+}
+
+abstract class StateManagement<T> extends ChangeNotifier {
+  T _state;
+
+  StateManagement(T initialState) : _state = initialState;
+
+  T get state => _state;
+
+  @protected
+  void emitState(T newState) {
+    if (identical(_state, newState)) return;
+    _state = newState;
+    notifyListeners();
   }
 }
 

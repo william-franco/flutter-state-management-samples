@@ -107,7 +107,7 @@ class UserRepositoryImpl implements UserRepository {
   }
 }
 
-typedef _ViewModel = Notifier<AppState<UserModel>>;
+typedef _ViewModel = Notifier<UserState>;
 
 typedef UserState = AppState<UserModel>;
 
@@ -131,21 +131,20 @@ class UserViewModelImpl extends _ViewModel implements UserViewModel {
 
   @override
   Future<void> getUserData() async {
-    state = const LoadingState();
-    _debug();
+    _emit(LoadingState());
 
     final result = await userRepository.findOneUser();
 
-    final newState = result.fold<UserState>(
+    final userState = result.fold<UserState>(
       onSuccess: (value) => SuccessState(data: value),
       onError: (error) => ErrorState(message: '$error'),
     );
 
-    state = newState;
-    _debug();
+    _emit(userState);
   }
 
-  void _debug() {
+  void _emit(UserState newState) {
+    state = newState;
     debugPrint('User state: $state');
   }
 }

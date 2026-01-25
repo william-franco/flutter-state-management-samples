@@ -118,22 +118,21 @@ class UserViewModelImpl implements UserViewModel {
 
   @override
   Future<void> getUserData() async {
-    _userState.value = LoadingState();
-    _debug();
+    _emit(LoadingState());
 
     final result = await userRepository.findOneUser();
 
-    final state = result.fold<AppState<UserModel>>(
+    final userState = result.fold<AppState<UserModel>>(
       onSuccess: (value) => SuccessState(data: value),
       onError: (error) => ErrorState(message: error.toString()),
     );
 
-    _userState.value = state;
-    _debug();
+    _emit(userState);
   }
 
-  void _debug() {
-    debugPrint('User state: $_userState');
+  void _emit(AppState<UserModel> newState) {
+    _userState.value = newState;
+    debugPrint('User state: $userState');
   }
 }
 
@@ -187,7 +186,7 @@ class _UserViewState extends State<UserView> {
           onRefresh: () async {
             await _getUserData();
           },
-          child: Watch.builder(
+          child: StateBuilderWidget(
             builder: (context) {
               return switch (userViewModel.userState.value) {
                 InitialState() => const Text('Aguardando ação...'),
@@ -200,5 +199,19 @@ class _UserViewState extends State<UserView> {
         ),
       ),
     );
+  }
+}
+
+@protected
+typedef StateBuilder = Widget Function(BuildContext context);
+
+class StateBuilderWidget extends StatelessWidget {
+  final StateBuilder builder;
+
+  const StateBuilderWidget({super.key, required this.builder});
+
+  @override
+  Widget build(BuildContext context) {
+    return Watch.builder(builder: (_) => builder(context));
   }
 }

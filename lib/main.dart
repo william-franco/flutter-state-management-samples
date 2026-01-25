@@ -123,17 +123,17 @@ class UserViewModelImpl extends _ViewModel implements UserViewModel {
 
     final result = await userRepository.findOneUser();
 
-    final state = result.fold<UserState>(
+    final userState = result.fold<UserState>(
       onSuccess: (value) => SuccessState(data: value),
       onError: (error) => ErrorState(message: '$error'),
     );
 
-    _emit(state);
+    _emit(userState);
   }
 
-  void _emit(UserState newValue) {
-    if (_userState != newValue) {
-      _userState = newValue;
+  void _emit(UserState newState) {
+    if (_userState != newState) {
+      _userState = newState;
       notifyListeners();
       debugPrint('User state: $_userState');
     }
