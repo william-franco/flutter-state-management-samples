@@ -4,7 +4,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.10.7
+  sdk: ^3.11.1
 
 dependencies:
   flutter:
@@ -17,7 +17,7 @@ dependencies:
   provider: ^6.1.5+1
   mobx: ^2.6.0
   flutter_mobx: ^2.3.0
-  flutter_riverpod: ^3.2.0
+  flutter_riverpod: ^3.2.1
 
 dev_dependencies:
   flutter_test:
