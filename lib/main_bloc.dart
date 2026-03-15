@@ -185,12 +185,12 @@ class _UserViewState extends State<UserView> {
           },
           child: StateBuilderWidget<UserViewModel, UserState>(
             viewModel: userViewModel,
-            builder: (context, state) {
-              return switch (state) {
-                InitialState() => const Text('Aguardando ação...'),
+            builder: (context, userState) {
+              return switch (userState) {
+                InitialState() => const SizedBox.shrink(),
                 LoadingState() => const CircularProgressIndicator(),
-                SuccessState(data: final user) => Text('Usuário: ${user.name}'),
-                ErrorState(message: final message) => Text('Erro: $message'),
+                SuccessState(data: final user) => Text('User: ${user.name}'),
+                ErrorState(message: final message) => Text('Error: $message'),
               };
             },
           ),
@@ -205,10 +205,13 @@ abstract class StateManagement<T> extends Cubit<T> {
 
   @protected
   void emitState(T newState) {
-    if (state != newState) {
-      emit(newState);
-    }
+    if (identical(state, newState)) return;
+    emit(newState);
+    debugPrint('StateManagement<$T> -> $newState');
   }
+
+  @override
+  String toString() => 'StateManagement<$T>(state: $state)';
 }
 
 @protected

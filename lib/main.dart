@@ -97,12 +97,12 @@ class UserRepositoryImpl implements UserRepository {
   }
 }
 
-typedef _ViewModel = ChangeNotifier;
+typedef _ViewModel = StateManagement<UserState>;
 
 typedef UserState = AppState<UserModel>;
 
 abstract interface class UserViewModel extends _ViewModel {
-  UserState get userState;
+  UserViewModel(super.initialState);
 
   Future<void> getUserData();
 }
@@ -110,12 +110,7 @@ abstract interface class UserViewModel extends _ViewModel {
 class UserViewModelImpl extends _ViewModel implements UserViewModel {
   final UserRepository userRepository;
 
-  UserViewModelImpl({required this.userRepository});
-
-  UserState _userState = InitialState();
-
-  @override
-  UserState get userState => _userState;
+  UserViewModelImpl({required this.userRepository}) : super(InitialState());
 
   @override
   Future<void> getUserData() async {
@@ -132,11 +127,8 @@ class UserViewModelImpl extends _ViewModel implements UserViewModel {
   }
 
   void _emit(UserState newState) {
-    if (_userState != newState) {
-      _userState = newState;
-      notifyListeners();
-      debugPrint('User state: $_userState');
-    }
+    emitState(newState);
+    debugPrint('User state: $state');
   }
 }
 
@@ -190,19 +182,66 @@ class _UserViewState extends State<UserView> {
           onRefresh: () async {
             await _getUserData();
           },
-          child: ListenableBuilder(
-            listenable: userViewModel,
-            builder: (context, child) {
-              return switch (userViewModel.userState) {
-                InitialState() => const Text('Aguardando ação...'),
+          child: StateBuilderWidget<UserViewModel, UserState>(
+            viewModel: userViewModel,
+            builder: (context, userState) {
+              return switch (userState) {
+                InitialState() => const SizedBox.shrink(),
                 LoadingState() => const CircularProgressIndicator(),
-                SuccessState(data: final user) => Text('Usuário: ${user.name}'),
-                ErrorState(message: final message) => Text('Erro: $message'),
+                SuccessState(data: final user) => Text('User: ${user.name}'),
+                ErrorState(message: final message) => Text('Error: $message'),
               };
             },
           ),
         ),
       ),
+    );
+  }
+}
+
+abstract class StateManagement<T> extends ChangeNotifier {
+  T _state;
+
+  StateManagement(T initialState) : _state = initialState;
+
+  T get state => _state;
+
+  @protected
+  void emitState(T newState) {
+    if (identical(_state, newState)) return;
+    _state = newState;
+    debugPrint('StateManagement<$T> -> $newState');
+    notifyListeners();
+  }
+
+  @override
+  String toString() => 'StateManagement<$T>(state: $_state)';
+}
+
+@protected
+typedef StateBuilder<S> = Widget Function(BuildContext context, S state);
+
+class StateBuilderWidget<V extends StateManagement<S>, S>
+    extends StatelessWidget {
+  final V viewModel;
+  final StateBuilder<S> builder;
+  final Widget? child;
+
+  const StateBuilderWidget({
+    super.key,
+    required this.viewModel,
+    required this.builder,
+    this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: viewModel,
+      child: child,
+      builder: (context, child) {
+        return builder(context, viewModel.state);
+      },
     );
   }
 }
