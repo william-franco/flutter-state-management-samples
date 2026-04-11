@@ -87,6 +87,10 @@ class UserModel {
   final String? name;
 
   UserModel({this.name});
+
+  UserModel copyWith({String? name}) {
+    return UserModel(name: name ?? this.name);
+  }
 }
 
 typedef UserResult = Result<UserModel, Exception>;
@@ -107,9 +111,9 @@ class UserRepositoryImpl implements UserRepository {
   }
 }
 
-typedef _ViewModel = Notifier<UserState>;
-
 typedef UserState = AppState<UserModel>;
+
+typedef _ViewModel = Notifier<UserState>;
 
 abstract interface class UserViewModel extends _ViewModel {
   UserState get userState;
@@ -204,6 +208,8 @@ class _UserViewState extends ConsumerState<UserView> {
     );
   }
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 @protected
 typedef StateBuilder<T> = Widget Function(BuildContext context, T state);

@@ -78,6 +78,10 @@ class UserModel {
   final String? name;
 
   UserModel({this.name});
+
+  UserModel copyWith({String? name}) {
+    return UserModel(name: name ?? this.name);
+  }
 }
 
 typedef UserResult = Result<UserModel, Exception>;
@@ -98,9 +102,9 @@ class UserRepositoryImpl implements UserRepository {
   }
 }
 
-typedef _ViewModel = StateManagement<UserState>;
-
 typedef UserState = AppState<UserModel>;
+
+typedef _ViewModel = StateManagement<UserState>;
 
 abstract interface class UserViewModel extends _ViewModel {
   UserViewModel(super.initialState);
@@ -200,18 +204,17 @@ class _UserViewState extends State<UserView> {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 abstract class StateManagement<T> extends Cubit<T> {
   StateManagement(super.initialState);
 
   @protected
   void emitState(T newState) {
-    if (identical(state, newState)) return;
-    emit(newState);
-    debugPrint('StateManagement<$T> -> $newState');
+    if (state != newState) {
+      emit(newState);
+    }
   }
-
-  @override
-  String toString() => 'StateManagement<$T>(state: $state)';
 }
 
 @protected

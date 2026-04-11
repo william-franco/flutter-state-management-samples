@@ -81,6 +81,10 @@ class UserModel {
   final String? name;
 
   UserModel({this.name});
+
+  UserModel copyWith({String? name}) {
+    return UserModel(name: name ?? this.name);
+  }
 }
 
 typedef UserResult = Result<UserModel, Exception>;
@@ -197,6 +201,8 @@ class _UserViewState extends State<UserView> {
     );
   }
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 @protected
 typedef StateBuilder = Widget Function(BuildContext context);

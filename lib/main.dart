@@ -77,6 +77,10 @@ class UserModel {
   final String? name;
 
   UserModel({this.name});
+
+  UserModel copyWith({String? name}) {
+    return UserModel(name: name ?? this.name);
+  }
 }
 
 typedef UserResult = Result<UserModel, Exception>;
@@ -97,20 +101,21 @@ class UserRepositoryImpl implements UserRepository {
   }
 }
 
-typedef _ViewModel = StateManagement<UserState>;
-
 typedef UserState = AppState<UserModel>;
 
-abstract interface class UserViewModel extends _ViewModel {
-  UserViewModel(super.initialState);
+typedef _ViewModel = StateManagement<UserState>;
 
+abstract interface class UserViewModel extends _ViewModel {
   Future<void> getUserData();
 }
 
 class UserViewModelImpl extends _ViewModel implements UserViewModel {
   final UserRepository userRepository;
 
-  UserViewModelImpl({required this.userRepository}) : super(InitialState());
+  UserViewModelImpl({required this.userRepository});
+
+  @override
+  UserState build() => const InitialState();
 
   @override
   Future<void> getUserData() async {
@@ -199,10 +204,17 @@ class _UserViewState extends State<UserView> {
   }
 }
 
-abstract class StateManagement<T> extends ChangeNotifier {
-  T _state;
+////////////////////////////////////////////////////////////////////////////////
 
-  StateManagement(T initialState) : _state = initialState;
+abstract class StateManagement<T> extends ChangeNotifier {
+  late T _state;
+
+  StateManagement() {
+    _state = build();
+  }
+
+  @protected
+  T build();
 
   T get state => _state;
 
@@ -210,7 +222,6 @@ abstract class StateManagement<T> extends ChangeNotifier {
   void emitState(T newState) {
     if (identical(_state, newState)) return;
     _state = newState;
-    debugPrint('StateManagement<$T> -> $newState');
     notifyListeners();
   }
 
