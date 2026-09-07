@@ -1,7 +1,42 @@
 # Flutter State Management Samples
 
-Under construction.
+State management pattern samples across popular Flutter libraries.
 
+## Stack
+
+| Technology | Version |
+|------------|---------|
+| Dart SDK | ^3.13.2 |
+| cupertino_icons | ^1.0.8 |
+| flutter_bloc | ^9.1.1 |
+| signals_flutter | ^6.3.0 |
+| provider | ^6.1.5+1 |
+| mobx | ^2.6.0 |
+| flutter_mobx | ^2.3.0 |
+| flutter_riverpod | ^3.3.1 |
+| flutter_lints | ^6.0.0 |
+| build_runner | ^2.15.0 |
+| mobx_codegen | ^2.7.7 |
+| Android Gradle Plugin | 9.1.0 |
+| Kotlin | 2.4.0 |
+| compileSdk / targetSdk | 36 |
+| minSdk | 29 |
+| JVM | 25 |
+| iOS Deployment Target | 15.0 |
+| Swift | 5.0 |
+
+## Architecture
+
+```
+lib/
+    ├── main.dart
+    ├── main_bloc.dart
+    ├── main_mobx.dart
+    ├── main_mobx.g.dart
+    ├── main_provider.dart
+    ├── main_riverpod.dart
+    └── main_signals.dart
+```
 
 ## Coverage
 
@@ -13,7 +48,6 @@ genhtml coverage/lcov.info -o coverage/html
 
 open coverage/html/index.html
 
-
 ## ScreenShots
 
 | Image 1 | Image 2 | Image 3 |
@@ -24,8 +58,7 @@ open coverage/html/index.html
 |----------|----------|----------|
 | ![App Screenshot](assets/screenshots/screen-4.png) | ![App Screenshot](assets/screenshots/screen-5.png) | ![App Screenshot](assets/screenshots/screen-6.png) |
 
-
-## Examples of commits
+## Commits
 
 ```
 git add . && git commit -m ":rocket: Initial commit." && git push
@@ -44,7 +77,6 @@ git add . && git commit -m ":test_tube: Added test functionality xyz." && git pu
 git add . && git commit -m ":construction_worker: Building in progress." && git push
 git add . && git commit -m ":construction_worker: Added CI build system." && git push
 ```
-
 
 ## License
 

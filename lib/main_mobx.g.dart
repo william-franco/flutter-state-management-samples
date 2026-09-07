@@ -15,13 +15,13 @@ mixin _$UserViewModel on UserViewModelBase, Store {
   );
 
   @override
-  AppState<UserModel, UserException> get userState {
+  StatePattern<UserModel, UserException> get userState {
     _$userStateAtom.reportRead();
     return super.userState;
   }
 
   @override
-  set userState(AppState<UserModel, UserException> value) {
+  set userState(StatePattern<UserModel, UserException> value) {
     _$userStateAtom.reportWrite(value, super.userState, () {
       super.userState = value;
     });
