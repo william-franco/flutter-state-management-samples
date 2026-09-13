@@ -1,12 +1,34 @@
 # Flutter State Management Samples
 
-State management pattern samples across popular Flutter libraries.
+Same counter scenario implemented with Provider, Bloc, Riverpod, MobX, and Signals.
+
+Helps compare boilerplate, testability, and rebuild behavior across libraries.
+
+Each variant is a separate entry point so you can run and diff implementations quickly.
+
+Complements documentation with runnable, minimal examples rather than abstract demos.
+
+## Structure
+
+```mermaid
+flowchart TB
+  SampleApp --> ProviderMain
+  SampleApp --> BlocMain
+  SampleApp --> RiverpodMain
+  SampleApp --> MobXMain
+  SampleApp --> SignalsMain
+  ProviderMain --> CounterLogic
+  BlocMain --> CounterLogic
+  RiverpodMain --> CounterLogic
+  MobXMain --> CounterLogic
+  SignalsMain --> CounterLogic
+```
 
 ## Stack
 
 | Technology | Version |
 |------------|---------|
-| Dart SDK | ^3.13.2 |
+| Dart SDK | ^3.13.3 |
 | cupertino_icons | ^1.0.8 |
 | flutter_bloc | ^9.1.1 |
 | signals_flutter | ^6.3.0 |
