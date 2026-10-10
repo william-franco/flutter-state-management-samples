@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## 2026-10-10
+
+- Commit: Updated Flutter SDK and dependencies.
+  - Refreshed dependency versions and related build configuration to keep the project current.
+- Commit: Resolved MobX code generation compatibility.
+  - Aligned mobx_codegen with build_runner and analyzer constraints.
+
 ## 2026-09-19
 
 - Commit: Updated dependencies.
