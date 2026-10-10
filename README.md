@@ -28,17 +28,17 @@ flowchart TB
 
 | Technology | Version |
 |------------|---------|
-| Dart SDK | ^3.13.4 |
+| Dart SDK | ^3.13.5 |
 | cupertino_icons | ^1.0.8 |
 | flutter_bloc | ^9.1.1 |
-| signals_flutter | ^6.3.0 |
+| signals_flutter | ^7.1.0 |
 | provider | ^6.1.5+1 |
-| mobx | ^2.6.0 |
-| flutter_mobx | ^2.3.0 |
-| flutter_riverpod | ^3.3.1 |
+| mobx | ^2.7.0 |
+| flutter_mobx | ^2.4.0 |
+| flutter_riverpod | ^3.4.3 |
 | flutter_lints | ^6.0.0 |
-| build_runner | ^2.15.0 |
-| mobx_codegen | ^2.7.7 |
+| build_runner | ^2.16.2 |
+| mobx_codegen | ^2.8.0 |
 | Android Gradle Plugin | 9.1.0 |
 | Kotlin | 2.4.0 |
 | NDK | 30.0.16248370 |
