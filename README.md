@@ -28,7 +28,8 @@ flowchart TB
 
 | Technology | Version |
 |------------|---------|
-| Dart SDK | ^3.13.7 |
+| Dart SDK | ^3.14.0 |
+| material_ui | ^1.11.0 |
 | cupertino_icons | ^1.0.8 |
 | flutter_bloc | ^9.1.1 |
 | signals_flutter | ^7.1.0 |
@@ -39,9 +40,9 @@ flowchart TB
 | flutter_lints | ^6.0.0 |
 | build_runner | ^2.16.2 |
 | mobx_codegen | ^2.8.0 |
-| Gradle | 9.3.1 |
-| Android Gradle Plugin | 9.1.0 |
-| Kotlin | 2.4.0 |
+| Gradle | 9.5.0 |
+| Android Gradle Plugin | 9.3.1 |
+| Kotlin | 2.4.20 |
 | NDK | 30.0.16248370 |
 | compileSdk / targetSdk | 36 |
 | minSdk | 29 |
