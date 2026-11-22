@@ -229,6 +229,6 @@ class StateBuilderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Watch.builder(builder: (_) => builder(context));
+    return SignalBuilder(builder: (_) => builder(context));
   }
 }
